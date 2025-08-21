@@ -13,138 +13,131 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.json());
 
-// ----------------------------------------
-// CÓDIGO PARA SERVIR O FRONTEND
-// ----------------------------------------
-
-// Servir os arquivos estáticos (CSS, JS, etc.) do frontend.
-// Esta linha deve vir antes de todas as rotas da API.
-app.use(express.static(path.join(__dirname, 'frontend/build')));
-
-// Rota coringa que serve o index.html para todas as requisições que não são da API.
-// Isso permite que o roteamento do React funcione corretamente.
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'frontend/build/index.html'));
-});
-
-// ----------------------------------------
-// FIM DO CÓDIGO PARA SERVIR O FRONTEND
-// ----------------------------------------
-
-
 // Função para ler o arquivo JSON
 const readData = () => {
-  try {
-    const data = fs.readFileSync(DATA_FILE, 'utf8');
-    return JSON.parse(data);
-  } catch (err) {
-    console.error('Erro ao ler o arquivo de dados:', err);
-    return { comunicados: [] };
-  }
+  try {
+    const data = fs.readFileSync(DATA_FILE, 'utf8');
+    return JSON.parse(data);
+  } catch (err) {
+    console.error('Erro ao ler o arquivo de dados:', err);
+    return { comunicados: [] };
+  }
 };
 
 // Função para escrever no arquivo JSON
 const writeData = (data) => {
-  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf8');
+  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf8');
 };
 
 // Rota para buscar todos os comunicados com métricas
 app.get('/api/comunicados', (req, res) => {
-  const { from_date, to_date } = req.query;
-  let dataFile = readData();
+  const { from_date, to_date } = req.query;
+  let dataFile = readData();
 
-  if (from_date && to_date) {
-    const startDate = new Date(from_date);
-    const endDate = new Date(to_date);
-    
-    dataFile.comunicados = dataFile.comunicados.filter(comunicado => {
-      const comunicadoDate = new Date(comunicado.data + 'T00:00:00'); 
-      return comunicadoDate >= startDate && comunicadoDate <= endDate;
-    });
-  }
+  if (from_date && to_date) {
+    const startDate = new Date(from_date);
+    const endDate = new Date(to_date);
+    
+    dataFile.comunicados = dataFile.comunicados.filter(comunicado => {
+      const comunicadoDate = new Date(comunicado.data + 'T00:00:00'); 
+      return comunicadoDate >= startDate && comunicadoDate <= endDate;
+    });
+  }
 
-  const comunicadosComMetricas = dataFile.comunicados.map(comunicado => {
-    const totalNotas = comunicado.feedbacks.reduce((sum, f) => sum + f.nota, 0);
-    const mediaSatisfacao = comunicado.feedbacks.length > 0 ? (totalNotas / comunicado.feedbacks.length).toFixed(1) : 0;
+  const comunicadosComMetricas = dataFile.comunicados.map(comunicado => {
+    const totalNotas = comunicado.feedbacks.reduce((sum, f) => sum + f.nota, 0);
+    const mediaSatisfacao = comunicado.feedbacks.length > 0 ? (totalNotas / comunicado.feedbacks.length).toFixed(1) : 0;
 
-    const distribuicao = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-    comunicado.feedbacks.forEach(f => {
-      distribuicao[f.nota]++;
-    });
+    const distribuicao = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    comunicado.feedbacks.forEach(f => {
+      distribuicao[f.nota]++;
+    });
 
-    return {
-      ...comunicado,
-      mediaSatisfacao,
-      numFeedbacks: comunicado.feedbacks.length,
-      distribuicao,
-    };
-  });
+    return {
+      ...comunicado,
+      mediaSatisfacao,
+      numFeedbacks: comunicado.feedbacks.length,
+      distribuicao,
+    };
+  });
 
-  res.status(200).json(comunicadosComMetricas);
+  res.status(200).json(comunicadosComMetricas);
 });
 
 // Rota para salvar um novo comunicado
 app.post('/api/comunicado', (req, res) => {
-  const { titulo, descricao, data, beneficioPrincipal, impacto, inovacaoEmMovimento } = req.body;
+  const { titulo, descricao, data, beneficioPrincipal, impacto, inovacaoEmMovimento } = req.body;
 
-  if (!titulo || !descricao) {
-    return res.status(400).json({ message: 'Campos obrigatórios faltando.' });
-  }
+  if (!titulo || !descricao) {
+    return res.status(400).json({ message: 'Campos obrigatórios faltando.' });
+  }
 
-  const dataFile = readData();
-  const newId = uuidv4().slice(0, 8);
-  const newToken = uuidv4().slice(0, 8);
+  const dataFile = readData();
+  const newId = uuidv4().slice(0, 8);
+  const newToken = uuidv4().slice(0, 8);
 
-  const novoComunicado = {
-    id: newId,
-    titulo,
-    descricao,
-    data,
-    beneficioPrincipal,
-    impacto,
-    inovacaoEmMovimento,
-    tokenFeedback: newToken,
-    feedbacks: [],
-  };
+  const novoComunicado = {
+    id: newId,
+    titulo,
+    descricao,
+    data,
+    beneficioPrincipal,
+    impacto,
+    inovacaoEmMovimento,
+    tokenFeedback: newToken,
+    feedbacks: [],
+  };
 
-  dataFile.comunicados.push(novoComunicado);
-  writeData(dataFile);
+  dataFile.comunicados.push(novoComunicado);
+  writeData(dataFile);
 
-  res.status(201).json({
-    message: 'Comunicado salvo com sucesso!',
-    comunicadoId: newId,
-    feedbackToken: newToken
-  });
+  res.status(201).json({
+    message: 'Comunicado salvo com sucesso!',
+    comunicadoId: newId,
+    feedbackToken: newToken
+  });
 });
 
 
 // Rota para salvar um novo feedback
 app.post('/api/feedback', (req, res) => {
-  const { tokenFeedback, nota, comentario } = req.body;
+  const { tokenFeedback, nota, comentario } = req.body;
 
-  if (!tokenFeedback || !nota) {
-    return res.status(400).json({ message: 'Token e nota são obrigatórios.' });
-  }
+  if (!tokenFeedback || !nota) {
+    return res.status(400).json({ message: 'Token e nota são obrigatórios.' });
+  }
 
-  const dataFile = readData();
-  const comunicado = dataFile.comunicados.find(c => c.tokenFeedback === tokenFeedback);
+  const dataFile = readData();
+  const comunicado = dataFile.comunicados.find(c => c.tokenFeedback === tokenFeedback);
 
-  if (!comunicado) {
-    return res.status(404).json({ message: 'Comunicado não encontrado para este token.' });
-  }
+  if (!comunicado) {
+    return res.status(404).json({ message: 'Comunicado não encontrado para este token.' });
+  }
 
-  const novoFeedback = {
-    nota: parseInt(nota, 10),
-    comentario,
-    timestamp: new Date().toISOString(),
-  };
+  const novoFeedback = {
+    nota: parseInt(nota, 10),
+    comentario,
+    timestamp: new Date().toISOString(),
+  };
 
-  comunicado.feedbacks.push(novoFeedback);
-  writeData(dataFile);
+  comunicado.feedbacks.push(novoFeedback);
+  writeData(dataFile);
 
-  res.status(200).json({ message: 'Feedback salvo com sucesso!' });
+  res.status(200).json({ message: 'Feedback salvo com sucesso!' });
+});
+
+// ----------------------------------------
+// CÓDIGO PARA SERVIR O FRONTEND
+// ----------------------------------------
+// MOVIDO PARA O FINAL PARA GARANTIR QUE AS ROTAS DA API SEJAM TRATADAS PRIMEIRO
+// ----------------------------------------
+
+app.use(express.static(path.join(__dirname, 'frontend/build')));
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'frontend/build/index.html'));
 });
 
 app.listen(PORT, () => {
-  console.log(`Servidor rodando em http://localhost:${PORT}`);
+  console.log(`Servidor rodando em http://localhost:${PORT}`);
 });
