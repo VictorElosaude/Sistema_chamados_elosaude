@@ -13,11 +13,23 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.json());
 
-// Adicione estas 3 linhas para servir o frontend
+// ----------------------------------------
+// CÓDIGO PARA SERVIR O FRONTEND
+// ----------------------------------------
+
+// Servir os arquivos estáticos (CSS, JS, etc.) do frontend.
+// Esta linha deve vir antes de todas as rotas da API.
 app.use(express.static(path.join(__dirname, 'frontend/build')));
+
+// Rota coringa que serve o index.html para todas as requisições que não são da API.
+// Isso permite que o roteamento do React funcione corretamente.
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'frontend/build/index.html'));
 });
+
+// ----------------------------------------
+// FIM DO CÓDIGO PARA SERVIR O FRONTEND
+// ----------------------------------------
 
 
 // Função para ler o arquivo JSON
@@ -35,11 +47,6 @@ const readData = () => {
 const writeData = (data) => {
   fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf8');
 };
-
-
-
-
-
 
 // Rota para buscar todos os comunicados com métricas
 app.get('/api/comunicados', (req, res) => {
@@ -139,7 +146,5 @@ app.post('/api/feedback', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Servidor rodando em http://localhost:${PORT}`);
+  console.log(`Servidor rodando em http://localhost:${PORT}`);
 });
-
-
