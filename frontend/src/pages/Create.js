@@ -49,7 +49,7 @@ const CreateComunicado = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:3000/api/comunicado', {
+      const response = await fetch('http://localhost:4000/api/comunicado', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
