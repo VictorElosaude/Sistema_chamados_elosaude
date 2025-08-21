@@ -1,13 +1,17 @@
 {
-  "dependencies": {
-    "body-parser": "^2.2.0",
-    "cors": "^2.8.5",
-    "express": "^5.1.0",
-    "react-router-dom": "^7.8.1",
-    "uuid": "^11.1.0"
-  },
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "Backend para o Sistema de Chamados EloSaúde",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "fs": "^0.0.1-security",
+    "path": "^0.12.7",
+    "uuid": "^9.0.1"
   }
 }
