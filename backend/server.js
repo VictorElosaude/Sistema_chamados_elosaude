@@ -126,4 +126,8 @@ app.post('/api/feedback', (req, res) => {
   res.status(200).json({ message: 'Feedback salvo com sucesso!' });
 });
 
+app.listen(PORT, () => {
+  console.log(`Servidor rodando em http://localhost:${PORT}`);
+});
+
 
