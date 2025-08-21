@@ -14,7 +14,7 @@ const AnalyticsPage = () => {
   const fetchData = async () => {
     setLoading(true);
     setError(null);
-    let url = 'http://localhost:3000/api/comunicados';
+    let url = 'http://localhost:4000/api/comunicados';
 
     if (startDate && endDate) {
       url += `?from_date=${startDate}&to_date=${endDate}`;
