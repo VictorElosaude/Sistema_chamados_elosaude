@@ -132,13 +132,12 @@ app.post('/api/feedback', (req, res) => {
 // MOVIDO PARA O FINAL PARA GARANTIR QUE AS ROTAS DA API SEJAM TRATADAS PRIMEIRO
 // ----------------------------------------
 
+
+// Serve arquivos estáticos do frontend
 app.use(express.static(path.join(__dirname, 'frontend/build')));
 
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'frontend/build/index.html'));
-});
-
-app.use((req, res) => {
-  res.sendFile(path.join(__dirname, 'frontend/build/index.html'));
+// Rota fallback para o React (front), mas ignorando rotas da API
+app.get(/^\/(?!api).*/, (req, res) => {
+  res.sendFile(path.join(__dirname, 'frontend/build', 'index.html'));
 });
 
