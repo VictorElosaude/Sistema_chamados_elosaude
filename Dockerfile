@@ -1,24 +1,23 @@
-# Estágio de Build
-FROM node:20-alpine AS build
-
-# Define o diretório de trabalho no container
+# Estágio de build do frontend
+FROM node:20 AS frontend-builder
 WORKDIR /app
+COPY ./frontend/package.json ./frontend/
+RUN npm install
+COPY ./frontend/ .
+RUN npm run build
 
-# Copia os arquivos de dependência do backend para cachear a camada
-COPY ./backend/package.json ./backend/package-lock.json ./backend/
+# Estágio de build do backend
+FROM node:20
+WORKDIR /app
+COPY ./backend/package.json ./backend/
+RUN npm install --prefix ./backend
 
-# Define o diretório de trabalho para a pasta do backend
+# Copia os arquivos do backend e do frontend
+COPY ./backend/ .
+COPY --from=frontend-builder /app/build ./frontend/build
+
+# Define o diretório de trabalho para o backend
 WORKDIR /app/backend
 
-# Instala as dependências do projeto
-RUN npm install
-
-# Copia o resto dos arquivos do backend
-COPY ./backend .
-
-# Comando de execução
-# Expõe a porta que a sua aplicação irá usar.
-EXPOSE 4000
-
-# Inicia a sua aplicação Node.js
-CMD ["node", "server.js"]
+# Comando para iniciar a aplicação
+CMD ["npm", "start"]
