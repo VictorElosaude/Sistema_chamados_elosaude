@@ -1,21 +1,24 @@
-# Stage 1: Use a Node.js base image
-FROM node:20-alpine
+# Estágio de Build
+FROM node:20-alpine AS build
 
 # Define o diretório de trabalho no container
 WORKDIR /app
 
-# Copia todos os arquivos do seu projeto para o diretório de trabalho no container.
-# O ponto '.' significa "copiar tudo daqui para o diretório de trabalho".
-COPY . .
+# Copia os arquivos de dependência do backend para cachear a camada
+COPY ./backend/package.json ./backend/package-lock.json ./backend/
 
-# Altera o diretório de trabalho para a sua subpasta de backend.
-WORKDIR /app/elosaude-backend
+# Define o diretório de trabalho para a pasta do backend
+WORKDIR /app/backend
 
 # Instala as dependências do projeto
 RUN npm install
 
+# Copia o resto dos arquivos do backend
+COPY ./backend .
+
+# Comando de execução
 # Expõe a porta que a sua aplicação irá usar.
-EXPOSE 3000
+EXPOSE 4000
 
 # Inicia a sua aplicação Node.js
 CMD ["node", "server.js"]
