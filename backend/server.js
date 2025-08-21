@@ -143,7 +143,6 @@ app.get('/api/comunicado/:id', (req, res) => {
   res.status(200).json(comunicado);
 });
 
-// --- Início das mudanças ---
 // Serve a pasta de build do frontend
 app.use(express.static(path.join(__dirname, '..', 'frontend', 'build')));
 
@@ -151,7 +150,6 @@ app.use(express.static(path.join(__dirname, '..', 'frontend', 'build')));
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'frontend', 'build', 'index.html'));
 });
-// --- Fim das mudanças ---
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
