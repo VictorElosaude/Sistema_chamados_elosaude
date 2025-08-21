@@ -13,6 +13,13 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.json());
 
+// Adicione estas 3 linhas para servir o frontend
+app.use(express.static(path.join(__dirname, 'frontend/build')));
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'frontend/build/index.html'));
+});
+
+
 // Função para ler o arquivo JSON
 const readData = () => {
   try {
@@ -28,6 +35,11 @@ const readData = () => {
 const writeData = (data) => {
   fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf8');
 };
+
+
+
+
+
 
 // Rota para buscar todos os comunicados com métricas
 app.get('/api/comunicados', (req, res) => {
