@@ -126,28 +126,6 @@ app.post('/api/feedback', (req, res) => {
   res.status(200).json({ message: 'Feedback salvo com sucesso!' });
 });
 
-// Rota para buscar um comunicado específico por ID
-app.get('/api/comunicado/:id', (req, res) => {
-  const { id } = req.params;
-  const dataFile = readData();
 
-  const comunicado = dataFile.comunicados.find(c => c.id === id);
-
-  if (!comunicado) {
-    return res.status(404).json({ message: 'Comunicado não encontrado.' });
-  }
-
-  res.status(200).json(comunicado);
-});
-
-// Serve a pasta de build do frontend
-app.use(express.static(path.join(__dirname, '..', 'frontend', 'build')));
-
-// Para qualquer outra rota, serve o arquivo index.html do frontend
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'frontend', 'build', 'index.html'));
-});
-
-app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
 });
