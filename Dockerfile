@@ -1,49 +1,46 @@
-# ----------------------------------------
-# Etapa 1: Build do frontend
-# ----------------------------------------
-FROM node:20 AS frontend-builder
-
+# Stage 1: Build do Frontend (React)
+FROM node:20-alpine AS build-frontend
 WORKDIR /app/frontend
 
-# Copia package.json e package-lock.json
-COPY ./frontend/package*.json ./
+# Copia os arquivos de dependência do frontend
+COPY frontend/package*.json ./
 
-# Instala dependências
-RUN npm install --legacy-peer-deps
+# Instala as dependências
+RUN npm install
 
-# Instala react-scripts globalmente para garantir execução
-RUN npm install -g react-scripts
+# Copia o restante dos arquivos do frontend
+COPY frontend .
 
-# Copia o restante do frontend
-COPY ./frontend/ .
-
-# Build do React
+# Executa a build de produção do frontend
 RUN npm run build
 
-# ----------------------------------------
-# Etapa 2: Build do backend
-# ----------------------------------------
-FROM node:20
+# ---
 
-WORKDIR /app/backend
-
-# Copia package.json e package-lock.json do backend
-COPY ./backend/package*.json ./
-
-# Instala dependências do backend
-RUN npm install --legacy-peer-deps
+# Stage 2: Servidor de Produção (Backend)
+FROM node:20-alpine AS production
+WORKDIR /app
 
 # Copia os arquivos do backend
-COPY ./backend/ .
+COPY backend/package*.json ./backend/
+COPY backend/server.js ./backend/
+COPY backend/data.json ./backend/
+COPY backend/database.js ./backend/ # Se existir
 
-# Copia build do frontend para backend
-COPY --from=frontend-builder /app/frontend/build ./frontend/build
+# Copia os arquivos de backend necessários (se houver)
+COPY backend ./backend
 
-# Variável de ambiente para a porta
-ENV PORT=4000
+# Instala apenas as dependências de produção do backend
+WORKDIR /app/backend
+RUN npm install --only=production
 
-# Expõe porta
-EXPOSE 4000
+# Copia a build do frontend para a pasta 'public' do backend
+COPY --from=build-frontend /app/frontend/build /app/backend/public
 
-# Comando para iniciar backend
+# Define o diretório de trabalho principal como o diretório do backend
+WORKDIR /app/backend
+
+# Expõe a porta que a sua aplicação irá usar
+EXPOSE 3000
+
+# Inicia a aplicação Node.js
 CMD ["node", "server.js"]
