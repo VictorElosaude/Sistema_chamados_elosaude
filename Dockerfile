@@ -5,11 +5,14 @@ FROM node:20 AS frontend-builder
 
 WORKDIR /app/frontend
 
-# Copia apenas package.json e package-lock.json para instalar dependências
-COPY ./frontend/package.json ./frontend/package-lock.json ./
+# Copia package.json e package-lock.json
+COPY ./frontend/package*.json ./
 
-# Instala dependências e garante permissões para react-scripts
-RUN npm install --legacy-peer-deps && chmod -R 755 ./node_modules/.bin
+# Instala dependências
+RUN npm install --legacy-peer-deps
+
+# Instala react-scripts globalmente para garantir execução
+RUN npm install -g react-scripts
 
 # Copia o restante do frontend
 COPY ./frontend/ .
@@ -24,8 +27,8 @@ FROM node:20
 
 WORKDIR /app/backend
 
-# Copia apenas package.json e package-lock.json do backend
-COPY ./backend/package.json ./backend/package-lock.json ./
+# Copia package.json e package-lock.json do backend
+COPY ./backend/package*.json ./
 
 # Instala dependências do backend
 RUN npm install --legacy-peer-deps
@@ -33,14 +36,14 @@ RUN npm install --legacy-peer-deps
 # Copia os arquivos do backend
 COPY ./backend/ .
 
-# Copia o build do frontend para dentro do backend
+# Copia build do frontend para backend
 COPY --from=frontend-builder /app/frontend/build ./frontend/build
 
-# Define variável de ambiente para a porta
+# Variável de ambiente para a porta
 ENV PORT=4000
 
-# Expõe a porta que o backend irá usar
+# Expõe porta
 EXPOSE 4000
 
-# Comando para iniciar o backend (que serve o frontend também)
+# Comando para iniciar backend
 CMD ["node", "server.js"]
