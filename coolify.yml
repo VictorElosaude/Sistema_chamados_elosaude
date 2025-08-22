@@ -1,0 +1,11 @@
+app:
+  name: meu-app            # nome do app no Coolify
+  type: nodejs             # tipo de app
+  build:
+    context: .             # pasta do projeto
+  environment:
+    PORT: 4000             # variável de ambiente para a porta
+  ports:
+    - container: 4000      # porta interna do container
+      host: 4000           # porta exposta externamente
+  autoDeploy: true         # deploy automático a cada push
